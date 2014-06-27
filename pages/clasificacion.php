@@ -4,14 +4,6 @@
 	<?php 
 		include "../pages/getProperty.php"; 
 		include "../pages/conexion_bd.php";
-		/*date_default_timezone_set('Europe/Madrid');
-		//Conexion con la base ChampionsLimb
-		//mysql_connect("localhost:3306","tapia","1234"); 
-		mysql_connect("db432348032.db.1and1.com:3306","dbo432348032","anopeludo"); 
-
-		//selecciÃ³n de la base de datos con la que vamos a trabajar 
-		//mysql_select_db("EURO2012"); 
-		mysql_select_db("db432348032"); */
 	?>
 	
 	<meta charset="ISO-8859-1">
@@ -81,7 +73,7 @@
 			if($apostador!=''){
 				echo ']},';
 			}
-			echo '{type: "line",name:"'.$row["nombre"].'",showInLegend: true,dataPoints:[{x:'.$i.',y:'.$row["ganancia"].'}';
+			echo '{type: "spline",name:"'.$row["nombre"].'",showInLegend: true,dataPoints:[{x:'.$i.',y:'.$row["ganancia"].'}';
 			$apostador=$row["nombre"];
 
 		}else{
@@ -99,8 +91,13 @@
 				data:arrDatos,				
 				axisY:{
 					//prefix: "€",
-					suffix: "€"
-					},
+					suffix: "€",
+					stripLines:[{
+					 			value:0,
+								color:"red",
+					            }
+					]
+				},
 				axisX:{
 					interval: 1
 				},toolTip:{             
@@ -169,7 +166,7 @@
 			if($apostador!=''){
 				echo ']},';
 			}
-			echo '{type: "line",name:"'.$row["nombre"].'",showInLegend: true,dataPoints:[{x:'.$i.',y:'.$gan.'}';
+			echo '{type: "spline",name:"'.$row["nombre"].'",showInLegend: true,dataPoints:[{x:'.$i.',y:'.$gan.'}';
 			$apostador=$row["nombre"];
 
 		}else{
@@ -188,7 +185,12 @@
 				data:arrDatos2,				
 				axisY:{
 					//prefix: "€",
-					suffix: "€"
+					suffix: "€",
+					stripLines:[{
+					 			value:0,
+								color:"red",
+					            }
+					]
 					},
 				axisX:{
 					interval: 1
