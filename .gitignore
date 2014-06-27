@@ -1,0 +1,10 @@
+*.class
+*.pyc
+*.pyo
+pages/conexion_bd_2.php
+pages/conexion_bd.php
+sorteo/conexion_bd.php
+
+.project
+
+*.prefs
