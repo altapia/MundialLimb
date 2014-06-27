@@ -99,6 +99,9 @@ if($result!=NULL){
 $fecha_actual = strtotime(date("d-m-Y",time()));
 $grupo=0;
 $visible=true;
+$hayBTAnterior=false;
+$hayPartidosOcultos=false;
+
 while ($row=mysql_fetch_array($result)) {
 
 //FECHA
@@ -114,12 +117,29 @@ while ($row=mysql_fetch_array($result)) {
 		$fecha_partido = strtotime($row["fecha"]);            							
 		echo '<div class="list-group">';
 
+		//echo '----->'.($fecha_partido-$fecha_actual).'<-----';
 		if($fecha_partido==$fecha_actual){
 			$visible=true;
-			echo '<a href="#" class="list-group-item" onclick="muestra(\'partido'.$grupo.'\');" style="padding-top: 0px;padding-bottom: 0px;background-color: darkorange;color: white;border-color: darkorange;">';
-		}else if($fecha_partido<$fecha_actual){
+			echo '<a href="#grupo'.$grupo.'" id="grupo'.$grupo.'"  name="fecha" class="list-group-item" onclick="muestra(\'partido'.$grupo.'\');" style="padding-top: 0px;padding-bottom: 0px;background-color: darkorange;color: white;border-color: darkorange;">';
+		}else if($fecha_partido<$fecha_actual){			
 			$visible=false;
-			echo '<a href="#" class="list-group-item" onclick="muestra(\'partido'.$grupo.'\');" style="padding-top: 0px;padding-bottom: 0px;background-color: gainsboro;border-color: gainsboro;">';
+			//El partido de ayer se muestra minimizado
+			if(($fecha_partido-$fecha_actual)==-86400){
+				$hayBTAnterior=true;
+		?>
+						<a href="#" id="muestraAnteriores" class="list-group-item text-center" onclick="muestraAnteriores();" style="padding-top: 0px;padding-bottom: 0px;background-color: gainsboro;border-color: gainsboro;">
+							<span class="glyphicon glyphicon-chevron-up"></span>  
+							<strong>Anteriores</strong>
+						</a>
+					</div>
+					<div class="list-group">
+		<?php
+				echo '<a href="#grupo'.$grupo.'" id="grupo'.$grupo.'" name="fecha" class="list-group-item" onclick="muestra(\'partido'.$grupo.'\');" style="padding-top: 0px;padding-bottom: 0px;background-color: gainsboro;border-color: gainsboro;">';
+			}else{
+				$hayPartidosOcultos=true;
+				echo '<a href="#grupo'.$grupo.'" id="grupo'.$grupo.'" name="fecha" class="list-group-item" onclick="muestra(\'partido'.$grupo.'\');" style="padding-top: 0px;padding-bottom: 0px;background-color: gainsboro;border-color: gainsboro;display:none;">';
+			}
+			
 		}else{
 			$visible=true;
 			echo '<a href="#" class="list-group-item active" onclick="muestra(\'partido'.$grupo.'\');" style="padding-top: 0px;padding-bottom: 0px">';
@@ -172,9 +192,21 @@ while ($row=mysql_fetch_array($result)) {
 			</tbody>
 		</table>
 	</div>
-  <? 		
-		}mysql_free_result($result);
-	?>
+<? 		
+		}
+		mysql_free_result($result);
+		
+		if($hayPartidosOcultos && !$hayBTAnterior){
+?>
+			<div class="list-group">
+				<a href="#" id="muestraAnteriores" class="list-group-item text-center" onclick="muestraAnteriores();" style="padding-top: 0px;padding-bottom: 0px;background-color: gainsboro;border-color: gainsboro;">
+					<span class="glyphicon glyphicon-chevron-up"></span>  
+					<strong>Anteriores</strong>
+				</a>
+			</div>
+<?php
+		}
+?>
     	    
 </div>
 </div>
@@ -224,8 +256,34 @@ while ($row=mysql_fetch_array($result)) {
 				}
     		});				
 		}
+		
 		function muestra(nombre){
+			
+			$('a[name="'+nombre+'"]').each(function(i,o){
+				if ($(this).css('display')!='none'){
+					var comment =$(this).attr('href').substr(1);
+					//Si está desplegado se oculta
+					if($('#comment'+comment).hasClass('in')){
+						$('#comment'+comment).collapse('hide');
+						/*$('#comment'+comment).on('hidden.bs.collapse', function () {
+  							cuenta--;
+  							if(cuenta==0){
+  								$('a[name="'+nombre+'"]').toggle();
+  								cuenta=-1;
+  							}
+						})*/
+					}
+				}
+			});
+			
+			
 			$('a[name="'+nombre+'"]').toggle();
+		
+		}
+
+		function muestraAnteriores(){
+			$('#muestraAnteriores').hide();
+			$('a[name="fecha"]').show();
 		}
 	</script>
 </body>
