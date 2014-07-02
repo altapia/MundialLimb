@@ -248,7 +248,7 @@ include "conexion_bd.php";
 	}
 	
 	/***************************/
-	/*AÑADIDO EN MUNDIAL LIMB */
+	/*Aï¿½ADIDO EN MUNDIAL LIMB */
 	/**************************/
 	
 	function getFechaTexto($fecha){
@@ -639,13 +639,13 @@ include "conexion_bd.php";
 
 
 	function getTabsApostadoresPorFase($idFase, $apostante){		
-		//Número de apostantes en la fase
+		//Nï¿½mero de apostantes en la fase
 		$resultApostEnFase=mysql_query('SELECT num_apostantes FROM fases WHERE id = '.$idFase);
 		$rowApostEnfase=mysql_fetch_array($resultApostEnFase);		
  	 	$numApostEnFase = $rowApostEnfase["num_apostantes"];
 		
 
-		//Número de apostantes en total
+		//Nï¿½mero de apostantes en total
  	 	$resultApostTotal=mysql_query('SELECT count(*) as num FROM apostantes');
 		$rowApostTotal=mysql_fetch_array($resultApostTotal);
 		mysql_free_result($resultApostTotal);
@@ -659,23 +659,36 @@ include "conexion_bd.php";
 		}else{
 			
 			$query="SELECT nombre, id 
-			FROM (
-				SELECT ap.id, ap.nombre, SUM(
-				CASE a.acertada 
-				    WHEN 1 THEN ((a.apostado*a.cotizacion)-a.apostado)
-				    WHEN 2 THEN (-1*a.apostado)
-				    ELSE 0 END
-				)as ganancia FROM apuestas a
-				INNER JOIN partidos p ON p.id= a.partido
-				INNER JOIN fases f ON f.clave=p.fase
-				INNER JOIN partido_apost_apuesta paa ON paa.idapuesta=a.id
-				INNER JOIN partido_apostante pa ON pa.id=paa.idpartidoapost
-				INNER JOIN apostantes ap ON ap.id = pa.idapostante
-				WHERE f.id=($idFase-1)
-				GROUP BY ap.nombre
-				ORDER BY ganancia DESC 
-			) cosas 
-			ORDER BY nombre asc LIMIT ".$numApostEnFase;
+					FROM (
+						SELECT 
+							ap.id, 
+							ap.nombre, 
+							SUM(
+								CASE a.acertada 
+								    WHEN 1 THEN ((a.apostado*a.cotizacion)-a.apostado)
+								    WHEN 2 THEN (-1*a.apostado)
+								    ELSE 0 END
+							)as ganancia 
+						FROM apuestas a
+							INNER JOIN partidos p ON p.id= a.partido
+							INNER JOIN fases f ON f.clave=p.fase
+							INNER JOIN partido_apost_apuesta paa ON paa.idapuesta=a.id
+							INNER JOIN partido_apostante pa ON pa.id=paa.idpartidoapost
+							INNER JOIN apostantes ap ON ap.id = pa.idapostante
+						WHERE ";
+
+			//Si estamos en Fase 3 (CUARTOS DE FINAL) se tienen en cuenta todos los partidos anteriores
+			if($idFase==3){
+				$query.=" f.id<3 ";
+			}else{
+				$query.=" f.id=(".$idFase."-1) ";
+			}
+							
+			$query.=" GROUP BY ap.nombre
+						ORDER BY ganancia DESC 
+						LIMIT ".$numApostEnFase."
+					) cosas 
+					ORDER BY nombre asc ";
 		}		
 		  
 		$result = "";
@@ -705,7 +718,7 @@ include "conexion_bd.php";
 		        $result='martes';
 		        break;	
 		    case 3:
-		        $result='miércoles';
+		        $result='miï¿½rcoles';
 		        break;
 		    case 4:
 		        $result='jueves';
@@ -714,7 +727,7 @@ include "conexion_bd.php";
 		        $result='viernes';
 		        break;
 		    case 6:
-		        $result='sábado';
+		        $result='sï¿½bado';
 		        break;		        		        		        		        	        
 		}
 		return $result;
