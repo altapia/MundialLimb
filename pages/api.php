@@ -64,14 +64,14 @@ switch ($_GET["q"]) {
 }
 
 function getApostantes(){
-//Número de apostantes en la fase
+//Nï¿½mero de apostantes en la fase
 		$resultApostEnFase=mysql_query("SELECT num_apostantes, id FROM fases WHERE activa=1 ORDER BY id DESC");
 		$rowApostEnfase=mysql_fetch_array($resultApostEnFase);		
  	 	$numApostEnFase = $rowApostEnfase["num_apostantes"];
  	 	$idFase = $rowApostEnfase["id"];
 		
 
-		//Número de apostantes en total
+		//Nï¿½mero de apostantes en total
  	 	$resultApostTotal=mysql_query('SELECT count(*) as num FROM apostantes');
 		$rowApostTotal=mysql_fetch_array($resultApostTotal);
 		mysql_free_result($resultApostTotal);
@@ -83,25 +83,37 @@ function getApostantes(){
 		if($numApostEnFase>=$numApostTotal){
 			$query="SELECT nombre, id FROM apostantes ORDER BY nombre ASC";
 		}else{
-			
 			$query="SELECT nombre, id 
-			FROM (
-				SELECT ap.id, ap.nombre, SUM(
-				CASE a.acertada 
-				    WHEN 1 THEN ((a.apostado*a.cotizacion)-a.apostado)
-				    WHEN 2 THEN (-1*a.apostado)
-				    ELSE 0 END
-				)as ganancia FROM apuestas a
-				INNER JOIN partidos p ON p.id= a.partido
-				INNER JOIN fases f ON f.clave=p.fase
-				INNER JOIN partido_apost_apuesta paa ON paa.idapuesta=a.id
-				INNER JOIN partido_apostante pa ON pa.id=paa.idpartidoapost
-				INNER JOIN apostantes ap ON ap.id = pa.idapostante
-				WHERE f.id=($idFase-1)
-				GROUP BY ap.nombre
-				ORDER BY ganancia DESC 
-			) cosas 
-			ORDER BY nombre asc LIMIT ".$numApostEnFase;
+					FROM (
+						SELECT 
+							ap.id, 
+							ap.nombre, 
+							SUM(
+								CASE a.acertada 
+						    		WHEN 1 THEN ((a.apostado*a.cotizacion)-a.apostado)
+						    		WHEN 2 THEN (-1*a.apostado)
+						    		ELSE 0 END
+							)as ganancia 
+						FROM apuestas a
+							INNER JOIN partidos p ON p.id= a.partido
+							INNER JOIN fases f ON f.clave=p.fase
+							INNER JOIN partido_apost_apuesta paa ON paa.idapuesta=a.id
+							INNER JOIN partido_apostante pa ON pa.id=paa.idpartidoapost
+							INNER JOIN apostantes ap ON ap.id = pa.idapostante
+						WHERE ";
+
+			//Si estamos en Fase 3 (CUARTOS DE FINAL) se tienen en cuenta todos los partidos anteriores
+			if($idFase==3){
+				$query.=" f.id<3 ";
+			}else{
+				$query.=" f.id=(".$idFase."-1) ";
+			}
+							
+			$query.=" GROUP BY ap.nombre
+					ORDER BY ganancia DESC 
+					LIMIT ".$numApostEnFase."
+				) cosas 
+				ORDER BY nombre asc";
 		}		
 		  
 		$result=mysql_query($query);
@@ -162,7 +174,7 @@ function getProximaJornada(){
 
 function getProximoPartidoSorteo(){
 	/*
-	 * Se obtienen el próximo partido sin apostante
+	 * Se obtienen el prï¿½ximo partido sin apostante
 	*/
 	
 	$queryPartidoSorteo="SELECT p.id,p.fecha, p.hora, e.nombre as local, f.nombre as visitante,  e.escudo as escLocal, f.escudo as escVisit 
